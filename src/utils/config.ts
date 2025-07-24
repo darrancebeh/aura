@@ -27,6 +27,45 @@ export const SUPPORTED_NETWORKS: SupportedNetworks = {
 
 export const DEFAULT_NETWORK = 'ethereum';
 
+/**
+ * Check if the configured RPC provider supports advanced trace features
+ */
+export function supportsAdvancedTrace(network: string): boolean {
+  const config = SUPPORTED_NETWORKS[network];
+  if (!config) return false;
+  
+  // Tenderly has excellent trace support
+  if (config.rpcUrl.includes('tenderly.co')) return true;
+  
+  // Alchemy has limited trace support (pay-as-you-go only)
+  if (config.rpcUrl.includes('alchemy.com')) return false;
+  
+  // Assume other providers need to be tested
+  return false;
+}
+
+/**
+ * Get provider-specific recommendations
+ */
+export function getProviderRecommendation(network: string): string {
+  const config = SUPPORTED_NETWORKS[network];
+  if (!config) return '';
+  
+  if (config.rpcUrl.includes('tenderly.co')) {
+    return 'Using Tenderly - excellent trace support available!';
+  }
+  
+  if (config.rpcUrl.includes('alchemy.com')) {
+    return 'Using Alchemy - upgrade to paid tier for trace support, or consider Tenderly';
+  }
+  
+  if (config.rpcUrl.includes('infura.io')) {
+    return 'Using Infura - trace support requires add-ons, consider Tenderly for better experience';
+  }
+  
+  return 'Using custom RPC - trace support may vary';
+}
+
 export function validateNetwork(network: string): void {
   if (!SUPPORTED_NETWORKS[network]) {
     const supportedList = Object.keys(SUPPORTED_NETWORKS).join(', ');

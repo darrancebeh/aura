@@ -20,6 +20,10 @@ program
   .argument('<txHash>', 'transaction hash to inspect')
   .option('-n, --network <network>', `blockchain network (${Object.keys(SUPPORTED_NETWORKS).join(', ')})`, 'ethereum')
   .option('--verbose', 'enable verbose error reporting')
+  .option('--depth <number>', 'limit call stack depth', parseInt)
+  .option('--contracts-only', 'show only contract calls')
+  .option('--events-only', 'show only events')
+  .option('--json', 'output raw trace data in JSON format')
   .action(async (txHash: string, options: any) => {
     await inspectCommand(txHash, options);
   });
@@ -30,6 +34,10 @@ program.on('--help', () => {
   console.log(chalk.bold('Examples:'));
   console.log('  $ aura inspect 0x1234...abcd');
   console.log('  $ aura inspect 0x1234...abcd --network polygon');
+  console.log('  $ aura inspect 0x1234...abcd --depth 3');
+  console.log('  $ aura inspect 0x1234...abcd --contracts-only');
+  console.log('  $ aura inspect 0x1234...abcd --events-only');
+  console.log('  $ aura inspect 0x1234...abcd --json');
   console.log('  $ aura inspect 0x1234...abcd --verbose');
   console.log('');
   console.log(chalk.bold('Supported Networks:'));
