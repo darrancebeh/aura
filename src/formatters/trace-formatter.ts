@@ -49,6 +49,13 @@ export class TraceFormatter {
     
     output.push(`${chalk.bold('Status:')} ${statusColor(statusText)}`);
     output.push(`${chalk.bold('Gas Used:')} ${chalk.yellow(Number(trace.totalGasUsed).toLocaleString())}`);
+    output.push(`${chalk.bold('Gas Price:')} ${chalk.cyan(tx.gasPrice)} gwei`);
+    
+    // Calculate total transaction fee
+    const gasUsedNum = parseInt(trace.totalGasUsed);
+    const gasPriceGwei = parseFloat(tx.gasPrice);
+    const totalCostEth = (gasUsedNum * gasPriceGwei / 1e9).toFixed(9);
+    output.push(`${chalk.bold('Transaction Fee:')} ${chalk.magenta(totalCostEth)} ETH`);
     
     if (tx.value !== '0.0') {
       output.push(`${chalk.bold('Value:')} ${chalk.cyan(tx.value)} ETH`);
