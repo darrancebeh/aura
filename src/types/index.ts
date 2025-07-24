@@ -128,3 +128,6 @@ export class AuraError extends Error {
     this.name = 'AuraError';
   }
 }
+
+// Export configuration types
+export * from './config.js';

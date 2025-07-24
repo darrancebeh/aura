@@ -1,20 +1,54 @@
 import { ethers } from 'ethers';
 import { SUPPORTED_NETWORKS, validateNetwork } from '../utils/config.js';
 import { TransactionInfo, AuraError, RawTrace, TraceCall } from '../types/index.js';
+import { ConfigManager } from '../services/config-manager.js';
 
 export class RpcProvider {
   private provider: ethers.JsonRpcProvider;
   private networkName: string;
-  private isTenderly: boolean;
+  private isTenderly: boolean = false;
+  private configManager: ConfigManager;
 
   constructor(network: string) {
     validateNetwork(network);
     this.networkName = network;
-    const config = SUPPORTED_NETWORKS[network];
-    this.provider = new ethers.JsonRpcProvider(config.rpcUrl);
+    this.configManager = new ConfigManager();
+    
+    // We'll initialize the provider async in a separate method
+    this.provider = this.createProvider();
+  }
+
+  /**
+   * Create provider with configuration fallback
+   */
+  private createProvider(): ethers.JsonRpcProvider {
+    const config = SUPPORTED_NETWORKS[this.networkName];
+    
+    // For now, use the config from SUPPORTED_NETWORKS
+    // Later, this will be enhanced to use ConfigManager async
+    const provider = new ethers.JsonRpcProvider(config.rpcUrl);
     
     // Detect if using Tenderly for optimizations
     this.isTenderly = config.rpcUrl.includes('tenderly.co');
+    
+    return provider;
+  }
+
+  /**
+   * Initialize provider with user configuration (call this before using)
+   */
+  async initializeWithConfig(): Promise<void> {
+    try {
+      const rpcUrl = await this.configManager.getRpcUrl(this.networkName);
+      
+      if (rpcUrl) {
+        this.provider = new ethers.JsonRpcProvider(rpcUrl);
+        this.isTenderly = rpcUrl.includes('tenderly.co');
+      }
+    } catch (error) {
+      // Silently fall back to default if config fails
+      // This ensures backward compatibility
+    }
   }
 
   async getTransactionInfo(txHash: string): Promise<TransactionInfo> {

@@ -26,6 +26,8 @@ export async function inspectCommand(
 
     // Initialize services
     const provider = new RpcProvider(network);
+    await provider.initializeWithConfig(); // Load user configuration
+    
     const parser = new TraceParser();
     const formatter = new TraceFormatter();
     const tokenService = new TokenService(provider);
