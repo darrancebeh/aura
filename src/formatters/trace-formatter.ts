@@ -1,12 +1,22 @@
 import chalk from 'chalk';
 import { ethers } from 'ethers';
 import { ParsedTrace, ParsedCall, ParsedEvent, InspectOptions } from '../types/index.js';
+import { TokenService } from '../services/token.js';
+import { RpcProvider } from '../providers/rpc.js';
 
 /**
  * Formatter for creating human-readable trace output
  * Handles color coding, indentation, and various display options
  */
 export class TraceFormatter {
+  private tokenService?: TokenService;
+
+  /**
+   * Initialize formatter with optional token service for enhanced context
+   */
+  setTokenService(tokenService: TokenService) {
+    this.tokenService = tokenService;
+  }
   
   /**
    * Format complete trace for display
@@ -131,15 +141,15 @@ export class TraceFormatter {
     const icon = this.getCallIcon(call.type);
     line += chalk.blue(icon) + ' ';
     
-    // Contract address (shortened)
-    line += chalk.cyan(this.shortenAddress(call.to));
+    // Contract address with name if available
+    line += this.formatContractAddress(call.to);
     
     // Function call if decoded
     if (call.decodedFunction) {
       line += chalk.white('.') + chalk.green(call.decodedFunction.name) + chalk.white('(');
       
       const params = call.decodedFunction.inputs.map(input => {
-        const value = this.formatParameterValue(input.value, input.type);
+        const value = this.formatParameterValue(input.value, input.type, call.to);
         const paramName = this.getReadableParameterName(input.name, input.type);
         return `${chalk.yellow(paramName)}: ${chalk.white(value)}`;
       }).join(', ');
@@ -180,7 +190,7 @@ export class TraceFormatter {
       line += chalk.green(event.decodedEvent.name) + chalk.white('(');
       
       const params = event.decodedEvent.inputs.map(input => {
-        const value = this.formatParameterValue(input.value, input.type);
+        const value = this.formatParameterValue(input.value, input.type, event.address);
         const paramName = this.getReadableParameterName(input.name, input.type);
         return `${chalk.yellow(paramName)}: ${chalk.white(value)}`;
       }).join(', ');
@@ -207,7 +217,7 @@ export class TraceFormatter {
         
         // Add parameters
         for (const input of event.decodedEvent.inputs) {
-          const value = this.formatParameterValue(input.value, input.type);
+          const value = this.formatParameterValue(input.value, input.type, event.address);
           const indexedMarker = input.indexed ? chalk.blue('[indexed]') : '';
           output.push(`    ${chalk.yellow(input.name)}: ${chalk.white(value)} ${indexedMarker}`);
         }
@@ -241,9 +251,25 @@ export class TraceFormatter {
   }
 
   /**
+   * Format contract address with name if available
+   */
+  private formatContractAddress(address: string): string {
+    const shortened = this.shortenAddress(address);
+    
+    if (this.tokenService) {
+      const tokenInfo = this.tokenService.getCachedTokenInfo(address);
+      if (tokenInfo) {
+        return `${chalk.cyan(shortened)} ${chalk.gray(`(${tokenInfo.symbol})`)}`;
+      }
+    }
+    
+    return chalk.cyan(shortened);
+  }
+
+  /**
    * Format parameter values for display
    */
-  private formatParameterValue(value: any, type: string): string {
+  private formatParameterValue(value: any, type: string, contractAddress?: string): string {
     if (type === 'address') {
       return this.shortenAddress(value.toString());
     }
@@ -257,7 +283,19 @@ export class TraceFormatter {
         return chalk.yellow('∞ (unlimited)');
       }
       
-      // Format token amounts (assume 18 decimals for now, could be enhanced)
+      // Try to format with token context if we have a contract address
+      if (contractAddress && this.tokenService) {
+        const tokenInfo = this.tokenService.getCachedTokenInfo(contractAddress);
+        if (tokenInfo) {
+          try {
+            return this.tokenService.formatTokenAmount(BigInt(num), tokenInfo);
+          } catch {
+            // Fall through to generic formatting
+          }
+        }
+      }
+      
+      // Format token amounts (fallback to generic decimal detection)
       const numValue = BigInt(num);
       
       // If it's a very large number, likely a token amount

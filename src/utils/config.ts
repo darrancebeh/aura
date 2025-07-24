@@ -52,18 +52,18 @@ export function getProviderRecommendation(network: string): string {
   if (!config) return '';
   
   if (config.rpcUrl.includes('tenderly.co')) {
-    return 'Using Tenderly - excellent trace support available!';
+    return 'Connected to Tenderly RPC';
   }
   
   if (config.rpcUrl.includes('alchemy.com')) {
-    return 'Using Alchemy - upgrade to paid tier for trace support, or consider Tenderly';
+    return 'Connected to Alchemy RPC';
   }
   
   if (config.rpcUrl.includes('infura.io')) {
-    return 'Using Infura - trace support requires add-ons, consider Tenderly for better experience';
+    return 'Connected to Infura RPC';
   }
   
-  return 'Using custom RPC - trace support may vary';
+  return 'Connected to custom RPC provider';
 }
 
 export function validateNetwork(network: string): void {

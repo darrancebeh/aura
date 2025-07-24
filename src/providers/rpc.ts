@@ -87,15 +87,10 @@ export class RpcProvider {
   /**
    * Fetch transaction trace using debug_traceTransaction
    * This provides the complete execution trace including internal calls
-   * Optimized for Tenderly's excellent trace support
    */
   async getTransactionTrace(txHash: string): Promise<RawTrace> {
     try {
-      if (this.isTenderly) {
-        console.log('⏳ Fetching transaction trace (Using Tenderly - excellent trace support available!)...');
-      } else {
-        console.log('⏳ Fetching transaction trace...');
-      }
+      console.log('⏳ Fetching transaction trace...');
       
       // Use call tracer for structured output
       // Tenderly supports this excellently with detailed logs
@@ -128,14 +123,10 @@ export class RpcProvider {
         throw error;
       }
 
-      // Handle common RPC errors with provider-specific guidance
+      // Handle common RPC errors
       if (error.code === -32601) {
-        const suggestion = this.isTenderly 
-          ? 'Unexpected error - Tenderly should support tracing. Please check your API key.'
-          : 'This RPC provider does not support transaction tracing. Consider using Tenderly for excellent trace support.';
-        
         throw new AuraError(
-          suggestion,
+          'This RPC provider does not support transaction tracing (debug_traceTransaction).',
           'TRACE_NOT_SUPPORTED'
         );
       }
@@ -147,10 +138,10 @@ export class RpcProvider {
         );
       }
 
-      // Tenderly-specific error handling
-      if (this.isTenderly && error.message?.includes('rate limit')) {
+      // Provider-specific error handling
+      if (error.message?.includes('rate limit')) {
         throw new AuraError(
-          'Tenderly rate limit reached. Please wait a moment before retrying.',
+          'Rate limit reached. Please wait a moment before retrying.',
           'RATE_LIMIT'
         );
       }
@@ -213,12 +204,12 @@ export class RpcProvider {
     if (this.isTenderly) {
       return {
         isTenderly: true,
-        message: 'Using Tenderly - excellent trace support available!'
+        message: 'Connected to Tenderly RPC'
       };
     }
     return {
       isTenderly: false,
-      message: 'Consider using Tenderly for superior trace support'
+      message: 'Connected to RPC provider'
     };
   }
 }

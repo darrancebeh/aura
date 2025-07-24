@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import { RpcProvider } from '../providers/rpc.js';
 import { TraceParser } from '../parsers/trace-parser.js';
 import { TraceFormatter } from '../formatters/trace-formatter.js';
+import { TokenService } from '../services/token.js';
 import { validateTransactionHash, DEFAULT_NETWORK, getProviderRecommendation, supportsAdvancedTrace } from '../utils/config.js';
 import { InspectOptions, AuraError } from '../types/index.js';
 
@@ -20,12 +21,6 @@ export async function inspectCommand(
     if (showProgress) {
       console.log(chalk.cyan(`🔍 Inspecting transaction: ${txHash}`));
       console.log(chalk.gray(`Network: ${network}`));
-      
-      // Show provider information
-      const providerInfo = getProviderRecommendation(network);
-      if (providerInfo) {
-        console.log(chalk.gray(`Provider: ${providerInfo}`));
-      }
       console.log('');
     }
 
@@ -33,6 +28,10 @@ export async function inspectCommand(
     const provider = new RpcProvider(network);
     const parser = new TraceParser();
     const formatter = new TraceFormatter();
+    const tokenService = new TokenService(provider);
+    
+    // Enhance formatter with token context
+    formatter.setTokenService(tokenService);
     
     // Check connection
     if (showProgress) {
@@ -47,13 +46,8 @@ export async function inspectCommand(
     }
     if (showProgress) {
       const tenderlyStatus = provider.getTenderlyStatus();
-      if (tenderlyStatus.isTenderly) {
-        console.log(chalk.green('✅ Connected to RPC provider'));
-        console.log(chalk.cyan(`   ${tenderlyStatus.message}\n`));
-      } else {
-        console.log(chalk.green('✅ Connected to RPC provider'));
-        console.log(chalk.gray(`   ${tenderlyStatus.message}\n`));
-      }
+      console.log(chalk.green('✅ Connected to RPC provider'));
+      console.log('');
     }
 
     // Fetch transaction info and trace data in parallel
@@ -75,7 +69,7 @@ export async function inspectCommand(
           traceError.message?.includes('debug_traceTransaction')) {
         if (showProgress) {
           console.log(chalk.yellow('⚠️  Trace data not available (RPC provider limitation)'));
-          console.log(chalk.gray('   Consider using Tenderly for excellent trace support\n'));
+          console.log('');
         }
         hasTraceData = false;
       } else {
@@ -194,11 +188,8 @@ async function displayBasicTransactionInfo(
   }
   
   console.log('');
-    console.log('');
-  console.log(chalk.yellow('💡 Tip: For detailed call traces, use Tenderly for superior trace support'));
-  console.log(chalk.gray('   Visit https://dashboard.tenderly.co to get your access key'));
-  console.log(chalk.gray('   Tenderly (recommended): https://dashboard.tenderly.co/'));
-  console.log(chalk.gray('   Alchemy Pay-as-you-go, Infura with add-ons, or your own node'));
+  console.log(chalk.yellow('💡 Tip: For detailed call traces, use an RPC provider with debug_traceTransaction support'));
+  console.log(chalk.gray('   Recommended providers: Tenderly, Alchemy (paid), Infura (with add-ons), or your own node'));
 }
 
 /**
