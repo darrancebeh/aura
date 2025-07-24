@@ -5,8 +5,11 @@ Here are some quick commands to test various functionalities:
 ## 1. Basic Functionality Tests
 
 ```bash
-# Build and test current working transaction
+# Build and test current working transaction (token transfer)
 npm run build && aura inspect 0xa4b1f606b66105fa45cb5db23d2f6597075701e7f0e2367f4e6a39d17a8cf98b
+
+# Test simple ETH transfer
+aura inspect 0x40455a064096af57e8440bdcb85034bb31f512f71fa12e01b1a47d5bac46e7cd
 
 # Test JSON output
 aura inspect 0xa4b1f606b66105fa45cb5db23d2f6597075701e7f0e2367f4e6a39d17a8cf98b --json | jq .

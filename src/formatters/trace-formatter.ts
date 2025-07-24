@@ -161,16 +161,12 @@ export class TraceFormatter {
       // Determine if this is a simple ETH transfer or unknown contract call
       const hasValue = call.value && call.value !== '0x0' && call.value !== '0' && parseFloat(ethers.formatEther(call.value)) > 0;
       
-      // Simple ETH transfer: has value but no function call (or very basic input)
-      if (hasValue && !call.decodedFunction) {
-        // Check if target is likely an EOA (externally owned account) vs contract
-        // For simple transfers, we don't need to show any function text
-        line += chalk.gray(' [ETH Transfer]');
-      } else if (!hasValue && !call.decodedFunction) {
-        // Contract call with unknown function
+      // For simple ETH transfers, don't add any extra text - the value display is enough
+      if (!hasValue) {
+        // Only show "Unknown Function" for contract calls without value
         line += chalk.gray(' [Unknown Function]');
       }
-      // If no value and no function, don't add anything (just address)
+      // If has value, don't add anything - the {X ETH} will show it's a transfer
     }
     
     // Value transfer

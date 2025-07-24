@@ -64,12 +64,12 @@ aura inspect 0xa4b1f606b66105fa45cb5db23d2f6597075701e7f0e2367f4e6a39d17a8cf98b
 
 ### Simple ETH Transfer
 ```bash
-aura inspect 0xc7ad46e0b8a400bb3c915120d284aec6560c9484def17e52c5acc96aff93c0b8
+aura inspect 0x40455a064096af57e8440bdcb85034bb31f512f71fa12e01b1a47d5bac46e7cd
 ```
-- **Hash**: `0xc7ad46e0b8a400bb3c915120d284aec6560c9484def17e52c5acc96aff93c0b8`
-- **Type**: Simple ETH transfer
+- **Hash**: `0x40455a064096af57e8440bdcb85034bb31f512f71fa12e01b1a47d5bac46e7cd`
+- **Type**: Simple ETH transfer (1.05 ETH)
 - **Network**: Ethereum
-- **Features**: Basic transaction, minimal trace
+- **Features**: ✅ Basic transaction, minimal trace, shows [ETH Transfer]
 
 ### Multi-Transfer Transaction
 ```bash
