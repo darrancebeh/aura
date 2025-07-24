@@ -1,0 +1,34 @@
+{
+  "name": "aura-cli",
+  "version": "0.1.0",
+  "description": "On-chain transaction inspector CLI tool for Web3 developers",
+  "main": "dist/cli/index.js",
+  "bin": {
+    "aura": "dist/cli/index.js"
+  },
+  "scripts": {
+    "dev": "tsx watch src/cli/index.ts",
+    "build": "tsc",
+    "start": "node dist/cli/index.js",
+    "type-check": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["blockchain", "ethereum", "transaction", "trace", "cli", "web3"],
+  "author": "darrancebeh",
+  "license": "MIT",
+  "dependencies": {
+    "ethers": "^6.13.0",
+    "commander": "^12.0.0",
+    "chalk": "^5.3.0",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.11.0",
+    "tsx": "^4.7.0",
+    "nodemon": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
