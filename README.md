@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js CI](https://github.com/darrancebeh/aura/workflows/Node.js%20CI/badge.svg)](https://github.com/darrancebeh/aura/actions)
 
-Aura transforms blockchain transaction traces into human-readable insights. Analyze transactions across Ethereum, Polygon, and Arbitrum with intelligent error handling, configuration validation, and guided setup.
+Aura transforms blockchain transaction traces into human-readable insights. Analyze transactions across Ethereum, Polygon, and Arbitrum networks.
 
 ![Aura Demo](docs/demo.gif)
 
@@ -25,15 +25,12 @@ Aura transforms blockchain transaction traces into human-readable insights. Anal
 - **Error Handling** - Helpful guidance when things go wrong
 
 ### 🤖 **Smart Configuration System** *(Enhanced in v2.0)*
-- **Typo Detection** - Automatic detection and correction suggestions for configuration errors
 - **Network Intelligence** - Automatic RPC provider detection and testing
 - **Interactive Setup** - Guided configuration process with real-time validation
 - **Health Monitoring** - Continuous validation of RPC connections and configurations
 - **Migration Assistant** - Seamless network switching with configuration backup
 
-## � Quick Start
-
-### � **Performance & Reliability**
+### 🏁 **Performance & Reliability**
 - **Multi-Network Support** - Ethereum, Polygon, Arbitrum (more coming soon)
 - **Lightning Fast** - Optimized for speed with intelligent caching
 - **Multiple Output Formats** - Terminal-friendly or JSON for programmatic use
