@@ -2,11 +2,13 @@ import { ethers } from 'ethers';
 import { SUPPORTED_NETWORKS, validateNetwork } from '../utils/config.js';
 import { TransactionInfo, AuraError, RawTrace, TraceCall } from '../types/index.js';
 import { ConfigManager } from '../services/config-manager.js';
+import { NetworkDetector } from '../services/network-detector.js';
 
 export class RpcProvider {
   private provider: ethers.JsonRpcProvider;
   private networkName: string;
   private isTenderly: boolean = false;
+  private hasTraceSupport: boolean = false;
   private configManager: ConfigManager;
 
   constructor(network: string) {
@@ -28,14 +30,16 @@ export class RpcProvider {
     // Later, this will be enhanced to use ConfigManager async
     const provider = new ethers.JsonRpcProvider(config.rpcUrl);
     
-    // Detect if using Tenderly for optimizations
-    this.isTenderly = config.rpcUrl.includes('tenderly.co');
+    // Detect provider capabilities
+    const providerInfo = NetworkDetector.detectProvider(config.rpcUrl);
+    this.isTenderly = providerInfo.type === 'tenderly';
+    this.hasTraceSupport = providerInfo.traceSupport;
     
     return provider;
   }
 
   /**
-   * Initialize provider with user configuration (call this before using)
+   * Initialize provider with user configuration and detect capabilities
    */
   async initializeWithConfig(): Promise<void> {
     try {
@@ -43,12 +47,64 @@ export class RpcProvider {
       
       if (rpcUrl) {
         this.provider = new ethers.JsonRpcProvider(rpcUrl);
-        this.isTenderly = rpcUrl.includes('tenderly.co');
+        
+        // Enhanced provider detection with capabilities
+        const providerInfo = NetworkDetector.detectProvider(rpcUrl);
+        this.isTenderly = providerInfo.type === 'tenderly';
+        this.hasTraceSupport = providerInfo.traceSupport;
+        
+        // Test capabilities if not already known
+        if (!this.hasTraceSupport) {
+          try {
+            const testResult = await NetworkDetector.testRpcConnection(rpcUrl, this.networkName);
+            if (testResult.capabilities) {
+              this.hasTraceSupport = testResult.capabilities.traceSupport;
+            }
+          } catch {
+            // Silently continue if capability test fails
+          }
+        }
       }
     } catch (error) {
       // Silently fall back to default if config fails
       // This ensures backward compatibility
     }
+  }
+
+  /**
+   * Check if current provider supports transaction tracing
+   */
+  supportsTracing(): boolean {
+    return this.hasTraceSupport;
+  }
+
+  /**
+   * Get provider information for troubleshooting
+   */
+  async getProviderInfo(): Promise<{
+    url: string;
+    type: string;
+    traceSupport: boolean;
+    recommendations?: string[];
+  }> {
+    const rpcUrl = await this.configManager.getRpcUrl(this.networkName);
+    const currentUrl = rpcUrl || SUPPORTED_NETWORKS[this.networkName].rpcUrl;
+    
+    const providerInfo = NetworkDetector.detectProvider(currentUrl);
+    const recommendations: string[] = [];
+    
+    if (!providerInfo.traceSupport) {
+      recommendations.push('For transaction tracing, consider using Tenderly which has excellent trace support');
+      recommendations.push('Alternative: Use Alchemy with debug API add-on');
+      recommendations.push(`Configure with: aura config rpc ${this.networkName} <tenderly_url>`);
+    }
+    
+    return {
+      url: currentUrl,
+      type: providerInfo.name,
+      traceSupport: providerInfo.traceSupport,
+      recommendations: recommendations.length > 0 ? recommendations : undefined
+    };
   }
 
   async getTransactionInfo(txHash: string): Promise<TransactionInfo> {
@@ -126,6 +182,19 @@ export class RpcProvider {
     try {
       console.log('⏳ Fetching transaction trace...');
       
+      // Check if provider supports tracing and provide helpful guidance
+      if (!this.hasTraceSupport) {
+        const providerInfo = await this.getProviderInfo();
+        throw new AuraError(
+          `Transaction tracing not supported by ${providerInfo.type} provider.\n` +
+          `Current URL: ${providerInfo.url}\n` +
+          `💡 Recommendations:\n` +
+          `${providerInfo.recommendations?.map(r => `   • ${r}`).join('\n') || '   • Use a provider with debug API support'}\n` +
+          `📚 Setup guide: https://docs.tenderly.co/web3-gateway/web3-gateway`,
+          'TRACE_NOT_SUPPORTED'
+        );
+      }
+      
       // Use call tracer for structured output
       // Tenderly supports this excellently with detailed logs
       const trace = await this.provider.send('debug_traceTransaction', [
@@ -157,10 +226,15 @@ export class RpcProvider {
         throw error;
       }
 
-      // Handle common RPC errors
+      // Handle common RPC errors with enhanced guidance
       if (error.code === -32601) {
+        const providerInfo = await this.getProviderInfo();
         throw new AuraError(
-          'This RPC provider does not support transaction tracing (debug_traceTransaction).',
+          `This RPC provider does not support transaction tracing (debug_traceTransaction).\n` +
+          `Provider: ${providerInfo.type}\n` +
+          `💡 Switch to a provider with trace support:\n` +
+          `${providerInfo.recommendations?.map(r => `   • ${r}`).join('\n') || '   • Use Tenderly, Alchemy with debug add-on, or similar'}\n` +
+          `📚 Setup guide: https://docs.tenderly.co/web3-gateway/web3-gateway`,
           'TRACE_NOT_SUPPORTED'
         );
       }

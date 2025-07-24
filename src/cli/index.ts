@@ -11,6 +11,7 @@ import {
   configPathCommand,
   configRpcCommand
 } from '../commands/config.js';
+import { registerSetupCommands } from '../commands/config-setup.js';
 import { SUPPORTED_NETWORKS } from '../utils/config.js';
 
 const program = new Command();
@@ -101,10 +102,14 @@ configCommand
   .argument('<network>', 'network name (ethereum, polygon, arbitrum)')
   .argument('[url]', 'RPC URL to set (omit to view current)')
   .option('--json', 'output in JSON format')
+  .option('--force', 'skip connection testing')
   .option('--verbose', 'verbose error reporting')
   .action(async (network: string, url: string | undefined, options: any) => {
     await configRpcCommand(network, url, options);
   });
+
+// Register setup commands (Pass 2 enhancement)
+registerSetupCommands(program);
 
 // Help and examples
 program.on('--help', () => {
@@ -125,6 +130,13 @@ program.on('--help', () => {
   console.log('  $ aura config rpc ethereum https://mainnet.infura.io/v3/YOUR_KEY');
   console.log('  $ aura config reset');
   console.log('  $ aura config path');
+  console.log('');
+  console.log(chalk.bold('Setup & Management:'));
+  console.log('  $ aura setup init                     # First-time interactive setup');
+  console.log('  $ aura setup check                    # Health check configuration');
+  console.log('  $ aura setup provider ethereum tenderly  # Provider setup wizard');
+  console.log('  $ aura setup migrate ethereum polygon  # Migrate between networks');
+  console.log('  $ aura setup env dev                   # Environment-specific config');
   console.log('');
   console.log(chalk.bold('Supported Networks:'));
   Object.entries(SUPPORTED_NETWORKS).forEach(([key, config]) => {
