@@ -10,31 +10,14 @@ Aura transforms blockchain transaction traces into human-readable insights. Anal
 
 ![Aura Demo](docs/demo.gif)
 
-## ✨ Features
+## ✨ Core Features
 
 ### 🔍 **Transaction Analysis**
-- **Human-Readable Traces** - Convert complex transaction data into clear, understandable insights
-- **Multi-Chain Support** - Ethereum, Polygon, Arbitrum with more networks planned
-- **Gas Optimization** - Identify gas inefficiencies and optimization opportunities
-- **Contract Interaction Analysis** - Detailed breakdown of smart contract calls and state changes
-
-### ⚡ **Performance & Reliability**
-- **Multi-Network Support** - Ethereum, Polygon, Arbitrum (more coming soon)
-- **Optimized Performance** - Fast execution with intelligent caching
-- **Multiple Output Formats** - Terminal-friendly or JSON for programmatic use
-- **Error Handling** - Helpful guidance when things go wrong
-
-### 🤖 **Smart Configuration System** *(Enhanced in v2.0)*
-- **Network Intelligence** - Automatic RPC provider detection and testing
-- **Interactive Setup** - Guided configuration process with real-time validation
-- **Health Monitoring** - Continuous validation of RPC connections and configurations
-- **Migration Assistant** - Seamless network switching with configuration backup
-
-### 🏁 **Performance & Reliability**
-- **Multi-Network Support** - Ethereum, Polygon, Arbitrum (more coming soon)
-- **Lightning Fast** - Optimized for speed with intelligent caching
-- **Multiple Output Formats** - Terminal-friendly or JSON for programmatic use
-- **Graceful Error Handling** - Helpful guidance when things go wrong
+- **Human-Readable Traces** - Convert complex transaction data into a clear, indented call stack.
+- **Multi-Network Support** - Works with Ethereum, Polygon, and Arbitrum out of the box.
+- **Intelligent Parsing** - Decodes function names, parameters, and events for known ABIs.
+- **Simple & Secure Config** - A one-time, interactive setup for your RPC provider. No .env files needed.
+- **Developer-Focused Output** - Clean terminal UI with an optional JSON output for scripting.
 
 ## 🚀 Quick Start
 
