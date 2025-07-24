@@ -1,53 +1,6 @@
 # 🔮 Aura
 
-**On-chain Transac- **Interactive Setup** - Guided configuration process with real-time validation
-- **Health Monitoring** - Continuous validation of RPC connections and configurations
-- **Migration Assistant** - Seamless network switching with configuration backup
-
-### 🛠 **Enhanced CLI Experience** *(New in v2.0)*
-- **Intelligent Error Handling** - Context-aware error messages with suggested fixes
-- **Real-time Testing** - Live validation of RPC endpoints during configuration
-- **Provider Recommendations** - Smart suggestions for optimal RPC providers based on usage patterns
-- **Interactive Onboarding** - Step-by-step setup process for new users
-
-## 🚀 Quick Start
-
-### Installation
-
-```bash
-npm install -g aura-cli
-```
-
-### Basic Usage
-
-```bash
-# Analyze a transaction
-aura trace 0x1234...abcd
-
-# Trace with JSON output
-aura trace 0x1234...abcd --json
-
-# Analyze on a specific network
-aura trace 0x1234...abcd --network polygon
-```
-
-### Smart Configuration Setup *(Enhanced)*
-
-The enhanced configuration system provides guided setup with intelligent validation:
-
-```bash
-# Interactive configuration setup
-aura config setup
-
-# Quick network configuration with validation
-aura config set --network ethereum --rpc-url https://eth-mainnet.alchemyapi.io/v2/YOUR_KEY
-
-# Test your configuration
-aura config test
-
-# Health check for all configured networks
-aura config health
-```tor for Web3 Developers**
+**On-chain Transaction Inspector for Web3 Developers**
 
 [![npm version](https://badge.fury.io/js/aura-cli.svg)](https://badge.fury.io/js/aura-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
