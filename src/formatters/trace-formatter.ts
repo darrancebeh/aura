@@ -140,7 +140,8 @@ export class TraceFormatter {
       
       const params = call.decodedFunction.inputs.map(input => {
         const value = this.formatParameterValue(input.value, input.type);
-        return `${chalk.yellow(input.name)}: ${chalk.white(value)}`;
+        const paramName = this.getReadableParameterName(input.name, input.type);
+        return `${chalk.yellow(paramName)}: ${chalk.white(value)}`;
       }).join(', ');
       
       line += params + chalk.white(')');
@@ -180,7 +181,8 @@ export class TraceFormatter {
       
       const params = event.decodedEvent.inputs.map(input => {
         const value = this.formatParameterValue(input.value, input.type);
-        return `${chalk.yellow(input.name)}: ${chalk.white(value)}`;
+        const paramName = this.getReadableParameterName(input.name, input.type);
+        return `${chalk.yellow(paramName)}: ${chalk.white(value)}`;
       }).join(', ');
       
       line += params + chalk.white(')');
@@ -248,9 +250,56 @@ export class TraceFormatter {
     
     if (type.startsWith('uint') || type.startsWith('int')) {
       const num = value.toString();
-      // Format large numbers with commas
+      
+      // Check for max uint256 (unlimited approval)
+      if (num === '115792089237316195423570985008687907853269984665640564039457584007913129639935' ||
+          num === '115792089237316195423570985008687907853269984665640564039457584007727448869935') {
+        return chalk.yellow('∞ (unlimited)');
+      }
+      
+      // Format token amounts (assume 18 decimals for now, could be enhanced)
+      const numValue = BigInt(num);
+      
+      // If it's a very large number, likely a token amount
+      if (num.length > 15) {
+        // Try different decimal places
+        const formatted18 = this.formatTokenAmount(numValue, 18);
+        const formatted6 = this.formatTokenAmount(numValue, 6);
+        const formatted5 = this.formatTokenAmount(numValue, 5); // GALA uses 5 decimals
+        
+        // Choose the most reasonable formatting based on result
+        if (formatted5.includes('.') && parseFloat(formatted5) > 0.001) {
+          return `${formatted5} ${chalk.dim('(5 decimals)')}`;
+        } else if (formatted6.includes('.') && parseFloat(formatted6) > 0.001) {
+          return `${formatted6} ${chalk.dim('(6 decimals)')}`;
+        } else if (formatted18.includes('.') && parseFloat(formatted18) > 0.001) {
+          return `${formatted18} ${chalk.dim('(18 decimals)')}`;
+        }
+      }
+      
+      // For numbers between 10-15 digits, likely token amounts too
+      if (num.length >= 10 && num.length <= 15) {
+        const formatted5 = this.formatTokenAmount(numValue, 5);
+        const formatted6 = this.formatTokenAmount(numValue, 6);
+        const formatted18 = this.formatTokenAmount(numValue, 18);
+        
+        // Choose the best formatting
+        if (parseFloat(formatted5) >= 1 && parseFloat(formatted5) < 1000000) {
+          return `${formatted5} ${chalk.dim('tokens')}`;
+        } else if (parseFloat(formatted6) >= 1 && parseFloat(formatted6) < 1000000) {
+          return `${formatted6} ${chalk.dim('tokens')}`;
+        } else if (parseFloat(formatted18) >= 1) {
+          return `${formatted18} ${chalk.dim('tokens')}`;
+        }
+      }
+      
+      // Format regular numbers with commas
       if (num.length > 6) {
-        return parseInt(num).toLocaleString();
+        try {
+          return parseInt(num).toLocaleString();
+        } catch {
+          return this.shortenLargeNumber(num);
+        }
       }
       return num;
     }
@@ -273,5 +322,58 @@ export class TraceFormatter {
     }
     
     return str;
+  }
+
+  /**
+   * Format token amounts with proper decimal places
+   */
+  private formatTokenAmount(value: bigint, decimals: number): string {
+    const divisor = BigInt(10 ** decimals);
+    const quotient = value / divisor;
+    const remainder = value % divisor;
+    
+    if (remainder === 0n) {
+      return quotient.toString();
+    }
+    
+    const remainderStr = remainder.toString().padStart(decimals, '0');
+    const trimmedRemainder = remainderStr.replace(/0+$/, '');
+    
+    if (trimmedRemainder === '') {
+      return quotient.toString();
+    }
+    
+    return `${quotient}.${trimmedRemainder}`;
+  }
+
+  /**
+   * Shorten very large numbers for display
+   */
+  private shortenLargeNumber(numStr: string): string {
+    if (numStr.length > 20) {
+      return `${numStr.slice(0, 8)}...${numStr.slice(-4)} ${chalk.dim('(large number)')}`;
+    }
+    return numStr;
+  }
+
+  /**
+   * Get more readable parameter names
+   */
+  private getReadableParameterName(paramName: string, paramType: string): string {
+    // Handle generic parameter names
+    if (paramName.startsWith('param') || paramName === '_to' || paramName === '_from') {
+      if (paramType === 'address') {
+        if (paramName.includes('to') || paramName === 'param1') return 'to';
+        if (paramName.includes('from') || paramName === 'param0') return 'from';
+        if (paramName.includes('spender')) return 'spender';
+        if (paramName.includes('owner')) return 'owner';
+        return 'address';
+      }
+      if (paramType.includes('uint') && (paramName.includes('amount') || paramName.includes('value'))) {
+        return 'amount';
+      }
+    }
+    
+    return paramName;
   }
 }
