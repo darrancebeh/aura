@@ -1,23 +1,45 @@
 # 🔮 Aura
 
-**On-chain Transaction Inspector for Web3 Developers**
+**Debug Any Blockchain Transaction in Seconds**
 
 [![npm version](https://badge.fury.io/js/aura-cli.svg)](https://badge.fury.io/js/aura-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js CI](https://github.com/darrancebeh/aura/workflows/Node.js%20CI/badge.svg)](https://github.com/darrancebeh/aura/actions)
 
-Aura transforms blockchain transaction traces into human-readable insights. Analyze transactions across Ethereum, Polygon, and Arbitrum networks.
+Stop digging through block explorers. Aura instantly shows you **exactly what happened** in any transaction with clear, developer-friendly output. Perfect for debugging failed transactions, analyzing gas usage, and understanding complex DeFi interactions.
 
 ![Aura Demo](docs/demo.gif)
 
-## ✨ Core Features
+## 🆚 Why Aura Over Block Explorers?
 
-### 🔍 **Transaction Analysis**
-- **Human-Readable Traces** - Convert complex transaction data into a clear, indented call stack.
-- **Multi-Network Support** - Works with Ethereum, Polygon, and Arbitrum out of the box.
-- **Intelligent Parsing** - Decodes function names, parameters, and events for known ABIs.
-- **Simple & Secure Config** - A one-time, interactive setup for your RPC provider. No .env files needed.
-- **Developer-Focused Output** - Clean terminal UI with an optional JSON output for scripting.
+While Etherscan and Polygonscan are great for basic transaction info, Aura gives you **developer superpowers**:
+
+| Block Explorers | 🔮 Aura |
+|-----------------|---------|
+| ❌ Raw transaction data | ✅ **Human-readable call traces** |
+| ❌ Cryptic function signatures | ✅ **Decoded function names & parameters** |
+| ❌ Scattered event logs | ✅ **Organized, indented call stack** |
+| ❌ Manual network switching | ✅ **Multi-chain support in one tool** |
+| ❌ Web interface only | ✅ **Terminal & JSON output for automation** |
+| ❌ No gas analysis | ✅ **Built-in gas optimization insights** |
+
+**Perfect for:**
+- 🐛 **Debugging failed transactions** - See exactly where and why it reverted
+- ⛽ **Gas optimization** - Identify expensive operations
+- 🔄 **DeFi analysis** - Understand complex swaps and interactions
+- 🤖 **Automation** - JSON output for scripts and monitoring
+
+## ✨ What You Get
+
+### 🔍 **Crystal Clear Transaction Breakdowns**
+- See exactly which functions were called and in what order
+- Understand token flows and balance changes instantly
+- Spot expensive operations draining your gas
+
+### ⚡ **Developer-First Experience**
+- Works across Ethereum, Polygon, and Arbitrum out of the box
+- Clean terminal output or JSON for automation
+- One command to analyze any transaction
 
 ## 🚀 Quick Start
 
@@ -29,22 +51,6 @@ npm install -g aura-cli
 
 # Or run directly with npx
 npx aura-cli inspect <transaction-hash>
-```
-
-### First-Time Setup (Interactive)
-
-```bash
-# Run the interactive setup wizard
-aura setup init
-
-# Output:
-# 🌟 Welcome to Aura! Let's set up your configuration.
-# 
-# 📡 Step 1/3: Choose your primary network
-# 📊 Step 2/3: Configure RPC provider  
-# 🧪 Step 3/3: Test configuration
-# 
-# 🎉 Setup complete! Aura is ready to use.
 ```
 
 ### Basic Usage
@@ -60,23 +66,11 @@ aura inspect 0x123... --network polygon
 aura inspect 0x123... --json
 ```
 
-### Configuration Management
+### First-Time Setup (Optional)
 
 ```bash
-# List all configuration
-aura config list
-
-# Set default network
-aura config set defaultNetwork polygon
-
-# Configure RPC for a network (with automatic testing)
-aura config rpc ethereum https://mainnet.gateway.tenderly.co/YOUR_KEY
-
-# Health check your configuration
-aura setup check
-
-# Get provider recommendations
-aura setup provider ethereum
+# Run the interactive setup wizard for custom RPC providers
+aura setup init
 ```
 
 ## 📖 Examples
@@ -127,118 +121,17 @@ Clearly shows revert reasons and where transactions failed in the call stack.
 
 ## 🔧 Configuration
 
-Aura includes an enhanced configuration system with error handling, validation, and interactive setup flows.
-
-### Configuration Features
-
-- **Typo Detection** - Suggests corrections for mistyped configuration keys
-- **Connection Testing** - Validates RPC URLs before saving them
-- **Provider Intelligence** - Automatically detects capabilities (trace support, archive access)
-- **Smart Recommendations** - Context-aware provider suggestions
-- **Health Monitoring** - Comprehensive configuration validation
-
-### Configuration Commands
+Aura works out of the box with public RPCs, but you can configure custom providers for better performance:
 
 ```bash
 # Interactive setup wizard
-aura setup init                          # First-time guided setup
-aura setup check                         # Health check your configuration
-aura setup provider ethereum tenderly    # Provider setup wizard
-aura setup migrate ethereum polygon      # Migrate between networks
-aura setup env dev                       # Environment-specific config
+aura setup init
 
-# Direct configuration
-aura config list                         # Show all settings
-aura config get defaultNetwork           # Get specific setting
-aura config set defaultNetwork polygon   # Set configuration value
-aura config rpc ethereum <url>          # Configure RPC (auto-tested)
-aura config reset                        # Reset to defaults
-aura config path                         # Show config file location
-```
+# Configure RPC for better trace support
+aura config rpc ethereum https://mainnet.gateway.tenderly.co/YOUR_KEY
 
-### Error Handling
-
-```bash
-# Typo detection
-$ aura config get defaltNetwork
-❌ Configuration Error: Invalid configuration key 'defaltNetwork'
-💡 Did you mean:
-   defaultNetwork
-
-# RPC validation with testing
-$ aura config rpc ethereum https://bad-url.com
-🧪 Testing RPC connection...
-❌ Connection test failed: Invalid URL
-💡 Recommendations:
-   • For transaction tracing, consider using Tenderly
-   • Alternative: Use Alchemy with debug API add-on
-   • Configure with: aura config rpc ethereum <tenderly_url>
-```
-
-### RPC Provider Configuration
-
-Aura automatically detects different RPC providers and their capabilities:
-
-| Provider | Trace Support | Auto-Detection | Use Case |
-|----------|---------------|----------------|----------|
-| **Tenderly** | ✅ Excellent | ✅ Yes | Development & debugging |
-| **Alchemy** | ⚠️ Paid tier | ✅ Yes | Production applications |
-| **Infura** | ⚠️ Add-on required | ✅ Yes | Reliable infrastructure |
-| **Public RPCs** | ❌ No | ✅ Yes | Testing only |
-
-**Provider Setup:**
-
-```bash
-# Interactive provider setup
-aura setup provider ethereum
-
-# Output shows:
-# 🔧 Setting up RPC provider for ethereum
-# 
-# Recommended providers:
-# 1. Tenderly - Excellent trace support and debugging tools
-# 2. Alchemy - Reliable and fast for production applications
-# 3. Infura - Established and reliable infrastructure
-#
-# 📋 Tenderly Setup Instructions:
-#    1. Sign up at https://tenderly.co
-#    2. Create a new project  
-#    3. Go to Settings → Gateway
-#    4. Copy your Access Key
-#    5. Use: aura config rpc ethereum https://mainnet.gateway.tenderly.co/YOUR_KEY
-```
-
-### Environment-Specific Configuration
-
-```bash
-# Development environment (debug enabled, Tenderly recommended)
-aura setup env dev
-
-# Production environment (optimized for reliability)
-aura setup env prod
-
-# Staging environment (production-like)
-aura setup env staging
-```
-
-### Configuration Files
-
-Aura stores configuration in `~/.aura/config.json` with automatic backups:
-
-```json
-{
-  "version": "0.1.0",
-  "defaultNetwork": "ethereum",
-  "rpcEndpoints": {
-    "ethereum": "https://mainnet.gateway.tenderly.co/YOUR_KEY",
-    "polygon": "https://polygon.gateway.tenderly.co/YOUR_KEY"
-  },
-  "settings": {
-    "outputFormat": "human",
-    "colorOutput": true,
-    "verboseMode": false
-  }
-}
+# Check your configuration
+aura setup check
 ```
 
 ### Supported Networks
@@ -249,135 +142,38 @@ Aura stores configuration in `~/.aura/config.json` with automatic backups:
 | Polygon | 137 | Public RPC |
 | Arbitrum | 42161 | Public RPC |
 
+### Advanced Configuration
+
+For detailed configuration options, custom RPC providers, and troubleshooting, see our [Configuration Guide](docs/configuration.md).
+
 ## 📚 Command Reference
 
-### Transaction Inspection
+### Basic Commands
 
-#### `aura inspect <txHash>`
+```bash
+# Inspect any transaction
+aura inspect <txHash> [--network polygon] [--json]
 
-Inspect a transaction and display its execution trace with intelligent analysis.
+# Configuration
+aura config list                    # Show all settings
+aura config rpc <network> <url>     # Set RPC endpoint
+aura setup init                     # Interactive setup
 
-**Options:**
-- `-n, --network <network>` - Network to use (ethereum, polygon, arbitrum)
-- `--json` - Output raw data in JSON format
-- `--verbose` - Enable detailed error reporting
+# Help
+aura --help                         # Show all commands
+aura inspect --help                 # Command-specific help
+```
+
+### Command Options
+
+**Transaction Inspection:**
+- `--network <network>` - Specify network (ethereum, polygon, arbitrum)
+- `--json` - JSON output for automation
 - `--depth <number>` - Limit call stack depth
 - `--contracts-only` - Show only contract calls
 - `--events-only` - Show only events
 
-**Examples:**
-```bash
-# Basic inspection with auto-configuration
-aura inspect 0x123...
-
-# Network-specific analysis
-aura inspect 0x123... --network polygon
-
-# JSON output for automation
-aura inspect 0x123... --json | jq '.events[]'
-
-# Focus on contract interactions
-aura inspect 0x123... --contracts-only --depth 5
-```
-
-### Configuration Management
-
-#### `aura config <command>`
-
-Manage Aura configuration with intelligent validation and testing.
-
-**Subcommands:**
-- `list` - Show all configuration settings
-- `get <key>` - Get specific configuration value
-- `set <key> <value>` - Set configuration value (with validation)
-- `rpc <network> [url]` - Configure RPC endpoint (with auto-testing)
-- `reset` - Reset configuration to defaults
-- `path` - Show configuration file paths
-
-**Examples:**
-```bash
-# View current configuration
-aura config list
-
-# Get specific setting with context
-aura config get rpc.ethereum
-# Output: Shows RPC URL + provider info + capabilities
-
-# Set with smart validation
-aura config set defaultNetwork polygon
-aura config set settings.outputFormat json
-
-# RPC configuration with testing
-aura config rpc ethereum https://mainnet.gateway.tenderly.co/KEY
-# Output: Tests connection, shows latency, detects capabilities
-```
-
-### Setup & Management
-
-#### `aura setup <command>`
-
-Interactive setup and configuration management with guided workflows.
-
-**Subcommands:**
-- `init` - Run first-time interactive setup wizard
-- `check` - Comprehensive configuration health check
-- `provider <network> [type]` - Interactive provider setup
-- `migrate <from> <to>` - Migrate configuration between networks
-- `env <environment>` - Setup environment-specific configuration
-
-**Examples:**
-```bash
-# First-time setup (recommended for new users)
-aura setup init
-
-# Health check with detailed analysis
-aura setup check
-# Output:
-# 🏥 Running Aura configuration health check...
-# ✅ Configuration file exists
-# ✅ Default network: ethereum  
-# 📡 Testing 2 RPC provider(s)...
-# ✅ ethereum: Connected (245ms)
-#    🔍 Trace: ✅  📚 Archive: ✅  🏷️ Provider: Tenderly
-
-# Provider setup wizard
-aura setup provider ethereum tenderly
-# Shows setup instructions, tests connection, saves config
-
-# Network migration
-aura setup migrate ethereum polygon
-# Migrates settings, finds working providers, updates defaults
-
-# Environment setup
-aura setup env dev
-# Configures debug mode, recommends Tenderly, optimizes for development
-```
-
-### Global Options
-
-```bash
-aura --version    # Show version
-aura --help       # Show comprehensive help
-aura <command> --help  # Command-specific help
-```
-aura inspect 0x123... --network polygon
-
-# JSON output for scripting
-aura inspect 0x123... --json | jq '.events[0]'
-
-# Limit complexity for large transactions
-aura inspect 0x123... --depth 3
-
-# Focus on events only
-aura inspect 0x123... --events-only
-```
-
-### Global Options
-
-```bash
-aura --version    # Show version
-aura --help      # Show help
-```
+For complete command documentation, see our [CLI Reference](docs/cli-reference.md).
 
 ## 🛠️ Development
 
@@ -429,33 +225,7 @@ npm start config list
 npm start setup init
 ```
 
-### Architecture
-
-Aura is built with a modular architecture:
-
-```
-src/
-├── cli/           # Command-line interface
-├── commands/      # Command implementations
-│   ├── config.ts      # Enhanced config commands  
-│   ├── config-setup.ts # Interactive setup system
-│   └── inspect.ts     # Transaction inspection
-├── services/      # Core business logic
-│   ├── config-manager.ts   # Configuration management
-│   ├── config-validator.ts # Validation & typo detection
-│   ├── network-detector.ts # RPC intelligence & testing
-│   └── token.ts           # Token recognition
-├── providers/     # Blockchain providers
-│   └── rpc.ts            # Enhanced RPC with capabilities
-├── types/         # TypeScript type definitions
-└── utils/         # Utility functions
-```
-
-**Design Principles:**
-- **User-Focused** - Every error includes helpful guidance
-- **Intelligent Defaults** - Automatic detection and optimization
-- **Industry Standards** - Following established CLI patterns
-- **Graceful Degradation** - Continues working when advanced features fail
+For detailed development information, see our [Contributing Guide](CONTRIBUTING.md).
 
 ## 🤝 Contributing
 
