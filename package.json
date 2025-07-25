@@ -1,6 +1,6 @@
 {
   "name": "aura-cli",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Debug any blockchain transaction in seconds - CLI tool for analyzing Ethereum, Polygon, and Arbitrum transactions",
   "main": "dist/cli/index.js",
   "bin": {
