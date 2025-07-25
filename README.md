@@ -36,6 +36,12 @@ While Etherscan and Polygonscan are great for basic transaction info, Aura gives
 - Understand token flows and balance changes instantly
 - Spot expensive operations draining your gas
 
+### 🔄 **Advanced DeFi Protocol Analysis**
+- **Uniswap V2 Detection**: Automatically identify swaps, liquidity operations, and routing
+- **Real-time Token Resolution**: Display token symbols, amounts, and exchange rates
+- **Multi-hop Swap Analysis**: Understand complex routing through multiple tokens
+- **Gas Cost Attribution**: See exactly how much gas each DeFi interaction consumed
+
 ### ⚡ **Developer-First Experience**
 - Works across Ethereum, Polygon, and Arbitrum out of the box
 - Clean terminal output or JSON for automation
@@ -74,6 +80,27 @@ aura setup init
 ```
 
 ## 📖 Examples
+
+### DeFi Protocol Analysis
+```bash
+# Analyze Uniswap V2 swaps and liquidity operations
+aura inspect 0x1234...abcd --analyze-defi
+```
+
+```
+🔄 DeFi Analysis:
+  🏛️  UNISWAP-V2
+     Type: swap
+     Description: Token swap: USDC → WETH via Uniswap V2
+     Swap: USDC → WETH
+     Amount In: 1,000.00 USDC
+     Amount Out: 0.4284 WETH
+     Rate: 1 USDC = 0.000428 WETH
+     Gas Used: 125,000
+     Contract: 0x7a25...488D
+     Function: swapExactTokensForTokens
+     Confidence: 95%
+```
 
 ### Token Transfer Analysis
 
@@ -172,6 +199,7 @@ aura inspect --help                 # Command-specific help
 - `--depth <number>` - Limit call stack depth
 - `--contracts-only` - Show only contract calls
 - `--events-only` - Show only events
+- `--analyze-defi` - Detect and analyze DeFi protocols (Uniswap V2, etc.)
 
 For complete command documentation, see our [CLI Reference](docs/cli-reference.md).
 

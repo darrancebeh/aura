@@ -100,7 +100,7 @@ export async function inspectCommand(
         if (showProgress) {
           console.log(chalk.yellow('⏳ Analyzing DeFi protocol interactions...'));
         }
-        const defiDetector = new DefiDetector();
+        const defiDetector = new DefiDetector(tokenService);
         defiAnalysis = await defiDetector.analyzeTrace(parsedTrace);
         if (showProgress) {
           console.log(chalk.green('✅ DeFi analysis completed\n'));

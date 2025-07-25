@@ -447,21 +447,54 @@ export class TraceFormatter {
       output.push(chalk.yellow(`     Type: ${interaction.type}`));
       output.push(chalk.gray(`     Description: ${interaction.description}`));
       
-      // Handle swap-specific details
+      // Handle swap-specific details with enhanced formatting
       if (interaction.type === 'swap' && interaction.details.swapDetails) {
         const swap = interaction.details.swapDetails as any;
+        
+        // Display the swap direction
         output.push(chalk.green(`     Swap: ${swap.tokenIn?.symbol || 'Token'} → ${swap.tokenOut?.symbol || 'Token'}`));
         
-        if (swap.amountIn && swap.tokenIn) {
-          output.push(`     Amount In: ${ethers.formatUnits(swap.amountIn, swap.tokenIn.decimals)} ${swap.tokenIn.symbol}`);
-        }
-        if (swap.amountOut && swap.tokenOut) {
-          output.push(`     Amount Out: ${ethers.formatUnits(swap.amountOut, swap.tokenOut.decimals)} ${swap.tokenOut.symbol}`);
+        // Format amounts with proper decimals
+        if (swap.amountIn && swap.tokenIn && swap.amountIn !== '0') {
+          try {
+            const amountFormatted = ethers.formatUnits(swap.amountIn, swap.tokenIn.decimals);
+            output.push(`     Amount In: ${amountFormatted} ${swap.tokenIn.symbol}`);
+          } catch {
+            output.push(`     Amount In: ${swap.amountIn} ${swap.tokenIn.symbol} (raw)`);
+          }
         }
         
+        if (swap.amountOut && swap.tokenOut && swap.amountOut !== '0') {
+          try {
+            const amountFormatted = ethers.formatUnits(swap.amountOut, swap.tokenOut.decimals);
+            output.push(`     Amount Out: ${amountFormatted} ${swap.tokenOut.symbol}`);
+          } catch {
+            output.push(`     Amount Out: ${swap.amountOut} ${swap.tokenOut.symbol} (raw)`);
+          }
+        }
+        
+        // Show routing for multi-hop swaps
         if (swap.route && swap.route.length > 2) {
           const routeSymbols = swap.route.map((token: any) => token.symbol).join(' → ');
-          output.push(chalk.blue(`     Route: ${routeSymbols}`));
+          output.push(chalk.blue(`     Route: ${routeSymbols} (${swap.route.length - 1} hop${swap.route.length > 2 ? 's' : ''})`));
+        } else if (swap.isMultiHop) {
+          output.push(chalk.blue(`     Route: Multi-hop swap detected`));
+        }
+        
+        // Calculate and show exchange rate if we have both amounts
+        if (swap.amountIn && swap.amountOut && swap.tokenIn && swap.tokenOut && 
+            swap.amountIn !== '0' && swap.amountOut !== '0') {
+          try {
+            const amountInFormatted = parseFloat(ethers.formatUnits(swap.amountIn, swap.tokenIn.decimals));
+            const amountOutFormatted = parseFloat(ethers.formatUnits(swap.amountOut, swap.tokenOut.decimals));
+            
+            if (amountInFormatted > 0) {
+              const exchangeRate = (amountOutFormatted / amountInFormatted).toFixed(6);
+              output.push(chalk.magenta(`     Rate: 1 ${swap.tokenIn.symbol} = ${exchangeRate} ${swap.tokenOut.symbol}`));
+            }
+          } catch {
+            // Skip exchange rate calculation if formatting fails
+          }
         }
       }
       
@@ -472,10 +505,28 @@ export class TraceFormatter {
         output.push(chalk.green(`     Liquidity ${action}: ${liq.token0?.symbol || 'Token0'}/${liq.token1?.symbol || 'Token1'}`));
         
         if (liq.amount0 && liq.token0) {
-          output.push(`     Token0: ${ethers.formatUnits(liq.amount0, liq.token0.decimals)} ${liq.token0.symbol}`);
+          try {
+            const amount0Formatted = ethers.formatUnits(liq.amount0, liq.token0.decimals);
+            output.push(`     Token0: ${amount0Formatted} ${liq.token0.symbol}`);
+          } catch {
+            output.push(`     Token0: ${liq.amount0} ${liq.token0.symbol} (raw)`);
+          }
         }
         if (liq.amount1 && liq.token1) {
-          output.push(`     Token1: ${ethers.formatUnits(liq.amount1, liq.token1.decimals)} ${liq.token1.symbol}`);
+          try {
+            const amount1Formatted = ethers.formatUnits(liq.amount1, liq.token1.decimals);
+            output.push(`     Token1: ${amount1Formatted} ${liq.token1.symbol}`);
+          } catch {
+            output.push(`     Token1: ${liq.amount1} ${liq.token1.symbol} (raw)`);
+          }
+        }
+      }
+      
+      // Show gas usage if available
+      if (interaction.details.gasUsed) {
+        const gasUsed = parseInt(interaction.details.gasUsed);
+        if (gasUsed > 0) {
+          output.push(chalk.cyan(`     Gas Used: ${gasUsed.toLocaleString()}`));
         }
       }
       
