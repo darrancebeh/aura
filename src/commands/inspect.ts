@@ -3,6 +3,7 @@ import { RpcProvider } from '../providers/rpc.js';
 import { TraceParser } from '../parsers/trace-parser.js';
 import { TraceFormatter } from '../formatters/trace-formatter.js';
 import { TokenService } from '../services/token.js';
+import { DefiDetector } from '../services/defi/defi-detector.js';
 import { validateTransactionHash, DEFAULT_NETWORK, getProviderRecommendation, supportsAdvancedTrace } from '../utils/config.js';
 import { InspectOptions, AuraError } from '../types/index.js';
 
@@ -93,15 +94,32 @@ export async function inspectCommand(
         await parser.parseLogs([...receipt.logs], parsedTrace);
       }
 
+      // Perform DeFi analysis if requested
+      let defiAnalysis;
+      if (options.analyzeDefi) {
+        if (showProgress) {
+          console.log(chalk.yellow('⏳ Analyzing DeFi protocol interactions...'));
+        }
+        const defiDetector = new DefiDetector();
+        defiAnalysis = await defiDetector.analyzeTrace(parsedTrace);
+        if (showProgress) {
+          console.log(chalk.green('✅ DeFi analysis completed\n'));
+        }
+      }
+
       if (showProgress) {
         console.log(chalk.green('✅ Trace parsed successfully\n'));
       }
 
       // Output results
       if (options.json) {
-        console.log(JSON.stringify(parsedTrace, null, 2));
+        const output = {
+          ...parsedTrace,
+          ...(defiAnalysis && { defiAnalysis })
+        };
+        console.log(JSON.stringify(output, null, 2));
       } else {
-        const formattedOutput = formatter.formatTrace(parsedTrace, options);
+        const formattedOutput = formatter.formatTrace(parsedTrace, options, defiAnalysis);
         formattedOutput.forEach(line => console.log(line));
       }
     } else {

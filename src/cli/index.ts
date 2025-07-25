@@ -33,6 +33,7 @@ program
   .option('--contracts-only', 'show only contract calls')
   .option('--events-only', 'show only events')
   .option('--json', 'output raw trace data in JSON format')
+  .option('--analyze-defi', 'analyze DeFi protocol interactions')
   .action(async (txHash: string, options: any) => {
     await inspectCommand(txHash, options);
   });

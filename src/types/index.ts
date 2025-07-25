@@ -27,6 +27,7 @@ export interface InspectOptions {
   contractsOnly?: boolean;
   eventsOnly?: boolean;
   json?: boolean;
+  analyzeDefi?: boolean;
 }
 
 // Trace-related types
@@ -131,3 +132,6 @@ export class AuraError extends Error {
 
 // Export configuration types
 export * from './config.js';
+
+// Export DeFi types
+export * from './defi-types.js';

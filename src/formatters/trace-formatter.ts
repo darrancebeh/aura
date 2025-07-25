@@ -1,6 +1,6 @@
 import chalk from 'chalk';
 import { ethers } from 'ethers';
-import { ParsedTrace, ParsedCall, ParsedEvent, InspectOptions } from '../types/index.js';
+import { ParsedTrace, ParsedCall, ParsedEvent, InspectOptions, DefiAnalysis } from '../types/index.js';
 import { TokenService } from '../services/token.js';
 import { RpcProvider } from '../providers/rpc.js';
 
@@ -21,12 +21,18 @@ export class TraceFormatter {
   /**
    * Format complete trace for display
    */
-  formatTrace(trace: ParsedTrace, options: InspectOptions): string[] {
+  formatTrace(trace: ParsedTrace, options: InspectOptions, defiAnalysis?: DefiAnalysis): string[] {
     const output: string[] = [];
     
     // Add transaction summary
     output.push(...this.formatTransactionSummary(trace));
     output.push('');
+    
+    // Add DeFi analysis if requested and available
+    if (options.analyzeDefi && defiAnalysis) {
+      output.push(...this.formatDefiAnalysis(defiAnalysis));
+      output.push('');
+    }
     
     // Add call trace
     if (!options.eventsOnly) {
@@ -421,5 +427,66 @@ export class TraceFormatter {
     }
     
     return paramName;
+  }
+
+  /**
+   * Format DeFi analysis results
+   */
+  private formatDefiAnalysis(defiAnalysis: DefiAnalysis): string[] {
+    const output: string[] = [];
+    
+    output.push(chalk.bold('🔄 DeFi Analysis:'));
+    
+    if (defiAnalysis.interactions.length === 0) {
+      output.push(chalk.gray('  No DeFi protocol interactions detected'));
+      return output;
+    }
+    
+    for (const interaction of defiAnalysis.interactions) {
+      output.push(chalk.cyan(`  🏛️  ${interaction.protocol.toUpperCase()}`));
+      output.push(chalk.yellow(`     Type: ${interaction.type}`));
+      output.push(chalk.gray(`     Description: ${interaction.description}`));
+      
+      // Handle swap-specific details
+      if (interaction.type === 'swap' && interaction.details.swapDetails) {
+        const swap = interaction.details.swapDetails as any;
+        output.push(chalk.green(`     Swap: ${swap.tokenIn?.symbol || 'Token'} → ${swap.tokenOut?.symbol || 'Token'}`));
+        
+        if (swap.amountIn && swap.tokenIn) {
+          output.push(`     Amount In: ${ethers.formatUnits(swap.amountIn, swap.tokenIn.decimals)} ${swap.tokenIn.symbol}`);
+        }
+        if (swap.amountOut && swap.tokenOut) {
+          output.push(`     Amount Out: ${ethers.formatUnits(swap.amountOut, swap.tokenOut.decimals)} ${swap.tokenOut.symbol}`);
+        }
+        
+        if (swap.route && swap.route.length > 2) {
+          const routeSymbols = swap.route.map((token: any) => token.symbol).join(' → ');
+          output.push(chalk.blue(`     Route: ${routeSymbols}`));
+        }
+      }
+      
+      // Handle liquidity-specific details
+      if ((interaction.type === 'liquidity_add' || interaction.type === 'liquidity_remove') && interaction.details.liquidityDetails) {
+        const liq = interaction.details.liquidityDetails as any;
+        const action = interaction.type === 'liquidity_add' ? 'Add' : 'Remove';
+        output.push(chalk.green(`     Liquidity ${action}: ${liq.token0?.symbol || 'Token0'}/${liq.token1?.symbol || 'Token1'}`));
+        
+        if (liq.amount0 && liq.token0) {
+          output.push(`     Token0: ${ethers.formatUnits(liq.amount0, liq.token0.decimals)} ${liq.token0.symbol}`);
+        }
+        if (liq.amount1 && liq.token1) {
+          output.push(`     Token1: ${ethers.formatUnits(liq.amount1, liq.token1.decimals)} ${liq.token1.symbol}`);
+        }
+      }
+      
+      output.push(chalk.gray(`     Contract: ${interaction.contractAddress}`));
+      if (interaction.functionName) {
+        output.push(chalk.gray(`     Function: ${interaction.functionName}`));
+      }
+      output.push(chalk.gray(`     Confidence: ${Math.round(interaction.confidence * 100)}%`));
+      output.push('');
+    }
+    
+    return output;
   }
 }
