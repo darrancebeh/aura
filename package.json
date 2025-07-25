@@ -1,11 +1,16 @@
 {
   "name": "aura-cli",
   "version": "0.1.0",
-  "description": "On-chain transaction inspector CLI tool for Web3 developers",
+  "description": "Debug any blockchain transaction in seconds - CLI tool for analyzing Ethereum, Polygon, and Arbitrum transactions",
   "main": "dist/cli/index.js",
   "bin": {
     "aura": "dist/cli/index.js"
   },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "dev": "tsx watch src/cli/index.ts",
     "build": "tsc",
@@ -19,13 +24,27 @@
   "keywords": [
     "blockchain",
     "ethereum",
+    "polygon",
+    "arbitrum",
     "transaction",
     "trace",
+    "debug",
     "cli",
-    "web3"
+    "web3",
+    "defi",
+    "smart-contracts",
+    "gas-analysis"
   ],
   "author": "darrancebeh",
   "license": "MIT",
+  "homepage": "https://github.com/darrancebeh/aura#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/darrancebeh/aura.git"
+  },
+  "bugs": {
+    "url": "https://github.com/darrancebeh/aura/issues"
+  },
   "dependencies": {
     "chalk": "^5.3.0",
     "commander": "^12.0.0",

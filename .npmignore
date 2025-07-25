@@ -1,0 +1,31 @@
+# Source files (only publish built dist/)
+src/
+tests/
+*.test.*
+*.spec.*
+
+# Development files
+.env
+.env.*
+*.log
+.DS_Store
+.vscode/
+.idea/
+.nyc_output/
+coverage/
+node_modules/
+
+# Build and development tools
+tsconfig.json
+jest.config.*
+.eslintrc.*
+.prettierrc.*
+nodemon.json
+.github/
+docs/
+
+# Test and development files
+test-suite.sh
+*.tgz
+.git/
+.gitignore
