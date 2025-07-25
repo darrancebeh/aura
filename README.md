@@ -2,9 +2,9 @@
 
 **Debug Any Blockchain Transaction in Seconds**
 
-[![npm version](https://badge.fury.io/js/aura-cli.svg)](https://badge.fury.io/js/aura-cli)
+[![npm version](https://img.shields.io/npm/v/aura-cli.svg)](https://www.npmjs.com/package/aura-cli)
+[![npm downloads](https://img.shields.io/npm/dm/aura-cli.svg)](https://www.npmjs.com/package/aura-cli)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js CI](https://github.com/darrancebeh/aura/workflows/Node.js%20CI/badge.svg)](https://github.com/darrancebeh/aura/actions)
 
 Stop digging through block explorers. Aura instantly shows you **exactly what happened** in any transaction with clear, developer-friendly output. Perfect for debugging failed transactions, analyzing gas usage, and understanding complex DeFi interactions.
 
